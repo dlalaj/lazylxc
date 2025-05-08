@@ -1,0 +1,11 @@
+[project]
+name = "lazylxc"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pylxd>=2.3.5",
+    "textual>=3.1.0",
+    "textual-dev>=1.7.0",
+]
