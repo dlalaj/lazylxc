@@ -60,7 +60,8 @@ class LazyLxcApp(App):
                     enclosed=ProjectView(id="projects", classes="listing"),
                 )
                 yield TitledWidget(
-                    title="Images", enclosed=ImageView(id="images", classes="listing")
+                    title="Images",
+                    enclosed=ImageView(id="images", classes="listing"),
                 )
                 yield TitledWidget(
                     title="Instances",
