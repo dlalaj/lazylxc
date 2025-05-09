@@ -7,5 +7,10 @@ requires-python = ">=3.12"
 dependencies = [
     "pylxd>=2.3.5",
     "textual>=3.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.8",
     "textual-dev>=1.7.0",
 ]
