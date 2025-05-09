@@ -1,0 +1,35 @@
+#left_panel {
+    border: round blue;
+    width: 30%;
+    height: 100%;
+}
+
+#right_panel {
+    border: round blue;
+    width: 70%;
+    height: 100%;
+}
+
+.title {
+    color: yellowgreen;
+    content-align: center top;
+}
+
+.listing {
+    border: round green;
+    background: rgb(18, 18, 18);
+    content-align: center top;
+}
+
+ModalScreen {
+    align: center middle;
+    background: $background 15%;
+    &:ansi {
+        background: transparent;
+    }
+}
+
+.textinput {
+    border: round yellowgreen;
+    width: 60%;
+}
