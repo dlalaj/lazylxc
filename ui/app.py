@@ -1,29 +1,11 @@
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widget import Widget
-from textual.widgets import Footer, Static, TabbedContent, TabPane, Markdown
+from textual.widgets import Footer, Static, TabbedContent, TabPane
 
-from .project_view import ProjectView
+from .project_view import ProjectView, ProjectSelected
 from .image_view import ImageView
 from .instance_view import InstanceView
-
-LETO = """
-Duke Leto I Atreides
-
-Head of House Atreides.
-"""
-
-JESSICA = """
-Lady Jessica
-
-Bene Gesserit and concubine of Leto, and mother of Paul and Alia.
-"""
-
-PAUL = """
-Paul Atreides
-
-Son of Leto and Jessica.
-"""
 
 
 class TitledWidget(Vertical):
@@ -38,7 +20,7 @@ class TitledWidget(Vertical):
 
 
 class LazyLxcApp(App):
-    """A TUI based application that allows a way to interface with LXC containers"""
+    """A TUI based application that allows interfacing with LXC containers"""
 
     CSS_PATH = "./styles.tcss"
 
@@ -49,6 +31,12 @@ class LazyLxcApp(App):
         ("4", "focus_right", "Info"),
         ("q", "exit_application", "Exit"),
     ]
+
+    TAB_MAP = {
+        "projects": [("Info", "project-info"), ("Settings", "project-settings")],
+        "images": [("Info", "image-info"), ("Config", "image-config")],
+        "instances": [("Info", "instance-info"), ("Logs", "instance-logs"), ("Config", "instance-config")],
+    }
 
     def compose(self) -> ComposeResult:
         self.theme = "textual-dark"
@@ -69,35 +57,44 @@ class LazyLxcApp(App):
                 )
 
             # Right panel to get information about a selected item
-            with TabbedContent(id="right_panel"):
-                with TabPane("Leto", id="leto"):
-                    yield Markdown(LETO)
-                with TabPane("Jessica", id="jessica"):
-                    yield Markdown(JESSICA)
-                with TabPane("Paul", id="paul"):
-                    yield Markdown(PAUL)
+            yield TabbedContent(id="right_panel")
         yield Footer()
+
+    def on_mount(self) -> None:
+        self.action_focus_projects()
+    
+    def on_project_selected(self, message: ProjectSelected) -> None:
+        # Refresh views on a newly selected project
+        project_name = message.project_name
+        
+        instance_view = self.query_exactly_one("#instances", InstanceView)
+        instance_view.handle_project_selected(project_name)
+
+        image_view = self.query_exactly_one("#images", ImageView)
+        image_view.handle_project_selected(project_name)
+
+
+    def update_tabbed_content(self, widget_id: str):
+        right_pannel = self.query_one("#right_panel", TabbedContent)
+        right_pannel.clear_panes()  # Remove old tab panes
+
+        for title, id in self.TAB_MAP[widget_id]:
+            right_pannel.add_pane(TabPane(title, id=id))
 
     def action_focus_projects(self) -> None:
         item = self.query_one("#projects")
         self.set_focus(item)
+        self.update_tabbed_content("projects")
 
     def action_focus_images(self) -> None:
         item = self.query_one("#images")
         self.set_focus(item)
+        self.update_tabbed_content("images")
 
     def action_focus_instances(self) -> None:
         item = self.query_one("#instances")
         self.set_focus(item)
-
-    def action_focus_right(self) -> None:
-        right_panel = self.query_one("#right_panel", TabbedContent)
-        self.set_focus(right_panel)  # Set focus on the TabbedContent widget
-        active_tab_id = right_panel.active  # Get the ID of the active tab
-        if active_tab_id:
-            right_panel.switch_tab(
-                active_tab_id
-            )  # Programmatically switch to the active tab
+        self.update_tabbed_content("instances")
 
     def action_exit_application(self) -> None:
         self.exit("Exiting lazylxc")

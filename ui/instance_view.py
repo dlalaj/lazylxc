@@ -1,7 +1,6 @@
 from textual.widgets import ListItem, ListView, Label
 from textual import log
 
-from ui.project_view import ProjectSelected
 from cmds.instance_commands import (
     list_instances,
     start_instance,
