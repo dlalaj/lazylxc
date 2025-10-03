@@ -31,18 +31,24 @@ class ImageView(ListView):
             disabled=disabled,
         )
         self.images = []
+        self.current_project = 'default'
 
     def _on_mount(self) -> None:
-        return self._refresh()
+        return self._refresh(self.current_project)
 
-    def _refresh(self):
+    def _refresh(self, project: str = 'default'):
         self.clear()
-        self.images: list[ImageRepr] = list_images()
+        self.images: list[ImageRepr] = list_images(project)
 
         for image in self.images:
-            # An image label is formatted like so: `<RELEASE> -- <SERIAL> -- <FINGERPRINT>`
+            # An image label format: `<RELEASE> -- <SERIAL> -- <FINGERPRINT>`
             pretty_label = f"{image.release} -- {image.serial} -- {image.fingerprint}"
             self.append(ListItem(Label(pretty_label)))
+
+    def handle_project_selected(self, project_name: str) -> None:
+        # Refresh projects on a newly selected project
+        self._refresh(project_name)
+        self.current_project = project_name
 
     def action_delete_image(self) -> None:
         """
@@ -61,13 +67,10 @@ class ImageView(ListView):
 
         # Extract fingerprint from `<RELEASE> -- <SERIAL> -- <FINGERPRINT>`
         fingerprint = image_line.split()[-1].strip()
-        error = delete_image(fingerprint)
+        error = delete_image(fingerprint, self.current_project)
         if error:
-            self.notify(message=str(error), title="Error deleting image", timeout=2)
+            self.notify(message=str(error), title="Error deleting", timeout=2)
             log(error)
         else:
             log("Image deleted successfully")
-        self._refresh()
-
-        # TODO: Complete logic to replace highlighted item
-        # self.action_select_cursor()
+        self._refresh(self.current_project)

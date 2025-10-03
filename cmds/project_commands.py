@@ -8,10 +8,11 @@ from pylxd.models.project import Project
 
 def list_projects() -> list[str]:
     client = pylxd.Client()
-    return [p.name for p in client.projects.all()]
+    all_projects = Project.all(client)
+    return [p.name for p in all_projects]
 
 
-def create_project(name: str) -> str:
+def create_project(name: str):
     client = pylxd.Client()
     try:
         Project.create(client, name)
@@ -24,7 +25,7 @@ def delete_project(name: str):
     client = pylxd.Client()
     try:
         proj = Project.get(client, name)
-        proj.delete()
+        proj.delete(wait=True)
         return None
     except LXDAPIException as err:
         return err
